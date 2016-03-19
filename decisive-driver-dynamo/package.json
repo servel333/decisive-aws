@@ -1,0 +1,29 @@
+{
+  "name": "decisive-driver-dynamo",
+  "version": "0.1.0",
+  "description": "Library for AWS DynamoDB",
+  "main": "lib/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/servel333/decisive-aws.git"
+  },
+  "keywords": [
+    "AWS",
+    "DynamoDB",
+    "NoSQL",
+    "Dynamo"
+  ],
+  "author": "Nathan Perry",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/servel333/decisive-aws/issues"
+  },
+  "homepage": "https://github.com/servel333/decisive-aws#readme",
+  "devDependencies": {}
+}
