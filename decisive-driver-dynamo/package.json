@@ -35,6 +35,8 @@
     "should": "^8.2.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.2.45"
+    "aws-sdk": "^2.2.45",
+    "lodash.concat": "^4.1.0",
+    "lodash.merge": "^4.3.2"
   }
 }

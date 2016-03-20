@@ -1,5 +1,8 @@
 "use strict";
 
+var merge = require('lodash.merge');
+var concat = require('lodash.concat');
+
 var isFunction = function isFunction(val) {
   return val && {}.toString.call(val) === '[object Function]';
 };
@@ -10,16 +13,45 @@ var Operation = module.exports = function Operation(docClient, methodName, param
   this.params = params;
 };
 
+Operation.prototype.log = function(){
+  if (console) {
+    console.log.apply(console, arguments);
+  }
+
+  return this;
+};
+
 Operation.prototype.loadAll = function(val){
-  this._loadAll = val === undefined ? true : !!val;
+  this.willLoadAll = val === undefined ? true : !!val;
+  return this;
 };
 
-Operation.prototype.hasNextPage = function(fn){
-  this._hasNextPage = fn;
+/** @callback Operation~getNextParamFn
+ *
+ *  @this Operation - The current operation instance
+ *  @param {object} resp - The response from the last pagination request
+ *  @param {object} params - The params for the last pagination request.
+ */
+
+/**
+ * Defines how pagination is to be performed.
+ *
+ * @param {string} itemsProperty -
+ * @param {Operation~getNextParamFn} getNextParamFn -
+ */
+Operation.prototype.definePagination = function(itemsProperty, getNextParamFn){
+  this.itemsProperty = itemsProperty;
+  this.getNextParamFn = getNextParamFn;
+  return this;
 };
 
-Operation.prototype.getNextParams = function(fn){
-  this._getNextParams = fn;
+Operation.prototype.hasNextPage = function(resp, params) {
+  return resp &&
+    this.itemsProperty &&
+    resp[this.itemsProperty] &&
+    resp[this.itemsProperty].length > 0 &&
+    isFunction(this.getNextParamFn) &&
+    this.getNextParamFn.call(this, resp, params);
 };
 
 Operation.prototype.driver = function(){
@@ -30,41 +62,53 @@ Operation.prototype.driver = function(){
   }
 };
 
-Operation.prototype.getNextPage = function(){
-
-};
-
-Operation.prototype.paginate = function(callback){
-
+Operation.prototype._send = function(params, callback){
+  var startTime = Date.now();
   var self = this;
-  this.driver[this.methodName].call(this.driver, this.params, function(err, data) {
-    var duration = Date.now() - self.startTime;
+
+  return this.driver()[this.methodName].call(this.driver(), params, function(err, resp) {
+    var duration = Date.now() - startTime;
 
     if (err) {
-      self.log({ method: self.methodName, duration: duration, err : err });
+      self.log({ method: this.methodName, duration: duration, err : err });
       return callback(err);
     }
 
-    self.log({ method: self.methodName, duration: duration, data : data });
-    return callback(null, data);
+    self.log({ method: this.methodName, duration: duration, resp: resp });
+    return callback(null, resp);
   });
-
 };
 
-Operation.prototype.exec = function(callback){
+Operation.prototype.exec = function(params, callback){
+
+  if (arguments.length === 1 && isFunction(params)) {
+    callback = params;
+    params = this.params;
+  }
+
   this.startTime = Date.now();
-  this.log.info({ method: this.methodName, params : this.params});
+  this.log({ method: this.methodName, params : params});
 
   var self = this;
-  this.driver[this.methodName].call(this.driver, this.params, function(err, data) {
-    var duration = Date.now() - self.startTime;
 
-    if (err) {
-      self.log({ method: self.methodName, duration: duration, err : err });
-      return callback(err);
+  var paginate = function(resp, params){
+
+    if (! self.willLoadAll || ! self.hasNextPage(resp, params)) {
+      return callback(null, resp);
     }
 
-    self.log({ method: self.methodName, duration: duration, data : data });
-    return callback(null, data);
+    var params2 = merge({}, params, self.getNextParamFn.call(self, resp, params));
+
+    self._send(params2, function(err, resp2){
+      if (err) { return callback(err); }
+      resp2[self.itemsProperty] = concat(resp[self.itemsProperty], resp2[self.itemsProperty]);
+      return paginate(resp2, params2);
+    });
+  };
+
+  // Fetch first page
+  this._send(params, function(err, resp){
+    if (err) { return callback(err); }
+    return paginate(resp, params);
   });
 };

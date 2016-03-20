@@ -147,10 +147,10 @@ DecisiveDriverDynamo.prototype.createTable = function(options){
   }
 
   return new DecisiveDriverDynamo.Operation(this.docClient, "createTable", params)
-    .hasNextPage(function(params, resp){
+    .setHasNextPage(function(params, resp){
       return resp.LastEvaluatedTableName;
     })
-    .getNextParams(function(params, resp){
+    .setGetNextParams(function(params, resp){
       return { ExclusiveStartTableName: resp.LastEvaluatedTableName };
     });
 };
