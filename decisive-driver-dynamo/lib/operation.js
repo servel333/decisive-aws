@@ -21,8 +21,14 @@ Operation.prototype.log = function(){
   return this;
 };
 
-Operation.prototype.loadAll = function(val){
-  this.willLoadAll = val === undefined ? true : !!val;
+/**
+ * Sets a flat indicating this operation will attempt to paginate to load all
+ * data from the operation.
+ *
+ * @param {bool} v - Defaults to true.
+ */
+Operation.prototype.loadAll = function(v){
+  this.willLoadAll = v === undefined ? true : !!v;
   return this;
 };
 

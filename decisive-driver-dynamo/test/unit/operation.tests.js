@@ -132,13 +132,6 @@ describe("Operation", function(){
         resp.should.have.propertyByPath('TableNames').and.length(10);
         resp.should.not.have.propertyByPath('LastEvaluatedTableName');
       })
-      .then(function(){
-      })
-      .then(function(){
-      })
-      .then(function(){
-      })
-
 
       // Clean the tables
       .then(function(){ return this.tableNames; })
