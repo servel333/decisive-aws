@@ -1,0 +1,22 @@
+{
+  "name": "decisive-support",
+  "version": "0.1.0",
+  "description": "DecisiveAws utilities",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/servel333/decisive-aws.git"
+  },
+  "keywords": [
+    "AWS"
+  ],
+  "author": "Nathan Perry",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/servel333/decisive-aws/issues"
+  },
+  "homepage": "https://github.com/servel333/decisive-aws#readme"
+}
