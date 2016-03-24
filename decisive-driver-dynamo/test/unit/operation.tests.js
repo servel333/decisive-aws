@@ -14,7 +14,10 @@ var dynamoDb = new AWS.DynamoDB({
   secretAccessKey: '****************************************',
 });
 
-Operation.prototype.log = function(){};
+var docClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDb });
+Promise.promisifyAll(Operation);
+Promise.promisifyAll(Operation.prototype);
+Promise.promisifyAll(dynamoDb);
 
 describe("Operation", function(){
 
@@ -38,27 +41,31 @@ describe("Operation", function(){
           },
         };
 
-        return Promise.fromCallback(function(callback){
-          new Operation(dynamoDb, 'createTable', params)
-            .exec(callback);
-        });
+        return new Operation()
+          .setDocClient(docClient)
+          .setMethodName('createTable')
+          .setParams(params)
+          .setItemProperty('TableDescription')
+          .execAsync();
       })
       .then(function(resp){
         // console.log('createTable =>', resp);
-        resp.should.have.propertyByPath('TableDescription', 'TableName').and.equal(this.tableName);
+        resp.should.have.propertyByPath('TableName').and.equal(this.tableName);
       })
 
       .then(function(){
         var params = { TableName: this.tableName };
 
-        return Promise.fromCallback(function(callback){
-          new Operation(dynamoDb, 'deleteTable', params)
-            .exec(callback);
-        });
+        return new Operation()
+          .setDocClient(docClient)
+          .setMethodName('deleteTable')
+          .setParams(params)
+          .setItemProperty('TableDescription')
+          .execAsync();
       })
       .then(function(resp){
         // console.log('deleteTable =>', resp);
-        resp.should.have.propertyByPath('TableDescription', 'TableName').and.equal(this.tableName);
+        resp.should.have.propertyByPath('TableName').and.equal(this.tableName);
       })
       .then(function(){ done(); })
       .catch(done);
@@ -68,16 +75,13 @@ describe("Operation", function(){
     Promise
       .bind({})
 
+      // Clean any previous tables
       .then(function(){
-        return Promise.fromCallback(function(callback){
-          dynamoDb.listTables({ Limit: 100 }, callback);
-        });
+        return dynamoDb.listTablesAsync({ Limit: 100 });
       })
       .get('TableNames')
       .map(function(tableName){
-        return Promise.fromCallback(function(callback){
-          dynamoDb.deleteTable({ TableName: tableName }, callback);
-        });
+        return dynamoDb.deleteTableAsync({ TableName: tableName });
       })
       .then(function(resp){
       })
@@ -105,47 +109,44 @@ describe("Operation", function(){
           },
         };
 
-        return Promise.fromCallback(function(callback){
-          new Operation(dynamoDb, 'createTable', params)
-            .exec(callback);
-        })
-          .then(function(resp){
+        return new Operation()
+          .setDocClient(docClient)
+          .setMethodName('createTable')
+          .setParams(params)
+          .setItemProperty('TableDescription')
+          .execAsync()
+          .tap(function(resp){
             // console.log('createTable =>', JSON.stringify(resp));
-            resp.should.have.propertyByPath('TableDescription', 'TableName').and.equal(tableName);
+            resp.should.have.propertyByPath('TableName').and.equal(tableName);
           });
       })
 
+      // Test loadAll function
       .then(function(){
-        return Promise.fromCallback(function(callback){
-          new Operation(dynamoDb, 'listTables', { Limit: 3 })
-            .definePagination('TableNames', function(resp, params){
-              if (resp && resp.LastEvaluatedTableName && resp.TableNames && resp.TableNames.length > 0){
-                return { ExclusiveStartTableName: resp.LastEvaluatedTableName };
-              }
-            })
-            .loadAll()
-            .exec(callback);
-        });
+        return new Operation()
+          .setDocClient(docClient)
+          .setMethodName('listTables')
+          .setParams({ Limit: 3 })
+          .setItemsProperty('TableNames')
+          .setGetNextParams(function(resp, params){
+            if (resp && resp.LastEvaluatedTableName && resp.TableNames && resp.TableNames.length > 0){
+              return { ExclusiveStartTableName: resp.LastEvaluatedTableName };
+            }
+          })
+          .loadAll()
+          .execAsync();
       })
       .then(function(resp){
-        console.log('listTables =>', JSON.stringify(resp));
-        resp.should.have.propertyByPath('TableNames').and.length(10);
+        // console.log('listTables =>', JSON.stringify(resp));
         resp.should.not.have.propertyByPath('LastEvaluatedTableName');
+        resp.should.not.have.propertyByPath('TableNames');
+        resp.should.have.length(10);
       })
 
       // Clean the tables
       .then(function(){ return this.tableNames; })
       .map(function(tableName){
-        var params = { TableName: tableName };
-
-        return Promise.fromCallback(function(callback){
-          new Operation(dynamoDb, 'deleteTable', params)
-            .exec(callback);
-        })
-          .then(function(resp){
-            // console.log('deleteTable =>', JSON.stringify(resp));
-            resp.should.have.propertyByPath('TableDescription', 'TableName').and.equal(tableName);
-          });
+        return dynamoDb.deleteTableAsync({ TableName: tableName });
       })
 
       .then(function(){ done(); })
