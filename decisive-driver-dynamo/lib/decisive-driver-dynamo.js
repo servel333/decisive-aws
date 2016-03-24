@@ -1,11 +1,8 @@
 "use strict";
 
 var AWS = require("aws-sdk");
-var DefaultLogger = require("./silent-logger");
-
-var isFunction = function isFunction(val) {
-  return val && {}.toString.call(val) === '[object Function]';
-};
+var DecisiveSupport = require("decisive-support");
+var DefaultLogger = function(){ return new DecisiveSupport.DefaultLogger(); };
 
 var DecisiveDriverDynamo = module.exports = function DecisiveDriverDynamo(config){
   config = config || {};
@@ -15,9 +12,9 @@ var DecisiveDriverDynamo = module.exports = function DecisiveDriverDynamo(config
 };
 
 DecisiveDriverDynamo.Operation = require("./operation");
-DecisiveDriverDynamo.ConsoleLogger = require("./console-logger");
-DecisiveDriverDynamo.SilentLogger = require("./silent-logger");
+DecisiveDriverDynamo.DecisiveSupport = DecisiveSupport;
 
+/// Sets the logger that new instances of this class will use.
 DecisiveDriverDynamo.setDefaultLogger = function(Logger){
   DefaultLogger = Logger;
 };

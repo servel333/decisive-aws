@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.2.45",
+    "decisive-support": "^0.1.0",
     "lodash.concat": "^4.1.0",
     "lodash.merge": "^4.3.2"
   }

@@ -1,17 +1,15 @@
 "use strict";
 
 var concat = require('lodash.concat');
-var DefaultLogger = require("./silent-logger");
+var DecisiveSupport = require("decisive-support");
 var merge = require('lodash.merge');
-
-var isFunction = function isFunction(val) {
-  return val && {}.toString.call(val) === '[object Function]';
-};
+var DefaultLogger = function(){ return new DecisiveSupport.DefaultLogger(); };
 
 var Operation = module.exports = function Operation(){
   this._logger = new DefaultLogger();
 };
 
+/// Sets the logger that new instances of this class will use.
 Operation.setDefaultLogger = function(Logger){
   DefaultLogger = Logger;
 };
@@ -73,15 +71,15 @@ Operation.prototype.hasNextPage = function(resp, params) {
     this._itemsProperty &&
     resp[this._itemsProperty] &&
     resp[this._itemsProperty].length > 0 &&
-    isFunction(this._getNextParams) &&
+    DecisiveSupport.isFunction(this._getNextParams) &&
     this._getNextParams.call(this, resp, params);
 };
 
 Operation.prototype.driver = function(){
   this._logger.trace({ class: 'Operation', function: 'driver', arguments: arguments });
-  if (isFunction(this._docClient[this._methodName])) {
+  if (DecisiveSupport.isFunction(this._docClient[this._methodName])) {
     return this._docClient;
-  } else if (isFunction(this._docClient.service[this._methodName])) {
+  } else if (DecisiveSupport.isFunction(this._docClient.service[this._methodName])) {
     return this._docClient.service;
   }
 };
