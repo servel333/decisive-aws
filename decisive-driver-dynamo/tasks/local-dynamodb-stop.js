@@ -7,7 +7,7 @@ module.exports = function(grunt) {
   var ps = require('ps-node');
   var Promise = require('bluebird');
 
-  grunt.registerTask('local-dynamodb-stop', function(){
+  grunt.registerTask('local-dynamodb-stop', 'Stop DynamoDB Local', function(){
 
     var done = this.async();
 

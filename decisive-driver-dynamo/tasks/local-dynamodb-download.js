@@ -6,7 +6,7 @@ module.exports = function(grunt) {
   var fs = require('fs');
   var Promise = require('bluebird');
 
-  grunt.registerTask('local-dynamodb-download', function(){
+  grunt.registerTask('local-dynamodb-download', 'Download and extract DynamoDB Local', function(){
 
     grunt.file.mkdir("_bin/dynamodb_local");
     grunt.file.mkdir("_var/dynamodb");

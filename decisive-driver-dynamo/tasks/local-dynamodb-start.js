@@ -7,7 +7,7 @@ module.exports = function(grunt) {
   var ps = require('ps-node');
   var Promise = require('bluebird');
 
-  grunt.registerTask('local-dynamodb-start', function(){
+  grunt.registerTask('local-dynamodb-start', 'Start DynamoDB Local', function(){
 
     grunt.file.mkdir("_bin/dynamodb_local");
     grunt.file.mkdir("_var/dynamodb");
