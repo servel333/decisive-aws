@@ -12,6 +12,10 @@ var Operation = module.exports = function Operation(){
   this._logger = new DefaultLogger();
 };
 
+Operation.setDefaultLogger = function(Logger){
+  DefaultLogger = Logger;
+};
+
 Operation.prototype.setLogger = function(logger){
   this._logger = logger;
 };

@@ -1,6 +1,7 @@
 "use strict";
 
 var AWS = require("aws-sdk");
+var DefaultLogger = require("./silent-logger");
 
 var isFunction = function isFunction(val) {
   return val && {}.toString.call(val) === '[object Function]';
@@ -10,12 +11,16 @@ var DecisiveDriverDynamo = module.exports = function DecisiveDriverDynamo(config
   config = config || {};
   this._dynamoDb = config.dynamoDb || config.docClient && config.docClient.service || new AWS.DynamoDB(config.options || {});
   this._docClient = config.docClient || new AWS.DynamoDB.DocumentClient({ service: this._dynamoDb });
-  this._logger = new DecisiveDriverDynamo.SilentLogger();
+  this._logger = new DefaultLogger();
 };
 
 DecisiveDriverDynamo.Operation = require("./operation");
 DecisiveDriverDynamo.ConsoleLogger = require("./console-logger");
 DecisiveDriverDynamo.SilentLogger = require("./silent-logger");
+
+DecisiveDriverDynamo.setDefaultLogger = function(Logger){
+  DefaultLogger = Logger;
+};
 
 DecisiveDriverDynamo.prototype.setLogger = function(logger){
   this._logger = logger;
