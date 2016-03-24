@@ -15,14 +15,10 @@ var dynamoDb = new AWS.DynamoDB({
 });
 
 var docClient = new AWS.DynamoDB.DocumentClient({ service: dynamoDb });
-Promise.promisifyAll(DecisiveDriverDynamo);
 Promise.promisifyAll(DecisiveDriverDynamo.prototype);
-Promise.promisifyAll(DecisiveDriverDynamo.Operation);
 Promise.promisifyAll(DecisiveDriverDynamo.Operation.prototype);
 Promise.promisifyAll(dynamoDb);
 Promise.promisifyAll(docClient);
-DecisiveDriverDynamo.prototype.log = function(){};
-DecisiveDriverDynamo.Operation.prototype.log = function(){};
 
 var d3 = new DecisiveDriverDynamo({ docClient: docClient });
 

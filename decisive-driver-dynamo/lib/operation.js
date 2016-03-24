@@ -1,7 +1,7 @@
 "use strict";
 
 var concat = require('lodash.concat');
-var ConsoleLogger = require("./console-logger");
+var DefaultLogger = require("./silent-logger");
 var merge = require('lodash.merge');
 
 var isFunction = function isFunction(val) {
@@ -9,7 +9,7 @@ var isFunction = function isFunction(val) {
 };
 
 var Operation = module.exports = function Operation(){
-  this._logger = new ConsoleLogger();
+  this._logger = new DefaultLogger();
 };
 
 Operation.prototype.setLogger = function(logger){
