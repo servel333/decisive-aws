@@ -1,0 +1,1 @@
+module.exports = require('./decisive-driver-dynamo');

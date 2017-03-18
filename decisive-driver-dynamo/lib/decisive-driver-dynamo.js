@@ -23,9 +23,6 @@ DecisiveDriverDynamo.prototype.setLogger = function(logger){
   this._logger = logger;
 };
 
-// The DeleteTable operation deletes a table and all of its items.
-// this._dynamoDb.deleteTable(params = {}, callback) ⇒ AWS.Request
-
 // Returns information about the table, including the current status of the table, when it was created, the primary key schema, and any indexes on the table.
 // this._dynamoDb.describeTable(params = {}, callback) ⇒ AWS.Request
 
@@ -36,16 +33,16 @@ DecisiveDriverDynamo.prototype.setLogger = function(logger){
 // this._dynamoDb.updateTable(params = {}, callback) ⇒ AWS.Request
 
 DecisiveDriverDynamo.prototype.createTable = function(options){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'createTable', arguments: arguments });
+  this._logger.trace({ function: 'DecisiveDriverDynamo.createTable', arguments: arguments });
 
   var params = {
 
     // An array of attributes that describe the key schema for the table and indexes.
     AttributeDefinitions: [
-      {
-        AttributeName: "",
-        AttributeType: "S | N | B"
-      },
+      // {
+      //   AttributeName: "",
+      //   AttributeType: "S | N | B"
+      // },
     ],
 
     // The name of the table to create.
@@ -68,15 +65,15 @@ DecisiveDriverDynamo.prototype.createTable = function(options){
 
   var ReadCapacityUnits =
     options.ProvisionedThroughput !== undefined &&
-    options.ProvisionedThroughput.ReadCapacityUnits !== undefined ||
-    options.ReadCapacityUnits !== undefined ||
-    options.readCapacity !== undefined;
+    options.ProvisionedThroughput.ReadCapacityUnits ||
+    options.ReadCapacityUnits ||
+    options.readCapacity;
 
   var WriteCapacityUnits =
     options.ProvisionedThroughput !== undefined &&
-    options.ProvisionedThroughput.WriteCapacityUnits !== undefined ||
-    options.WriteCapacityUnits !== undefined ||
-    options.writeCapacity !== undefined;
+    options.ProvisionedThroughput.WriteCapacityUnits ||
+    options.WriteCapacityUnits ||
+    options.writeCapacity;
 
   if (ReadCapacityUnits || WriteCapacityUnits) {
     params.ProvisionedThroughput = {};
@@ -153,18 +150,18 @@ DecisiveDriverDynamo.prototype.createTable = function(options){
     }
   }
 
-  return new DecisiveDriverDynamo.Operation(this._docClient, "createTable", params)
-    .setHasNextPage(function(params, resp){
-      return resp.LastEvaluatedTableName;
-    })
-    .setGetNextParams(function(params, resp){
-      return { ExclusiveStartTableName: resp.LastEvaluatedTableName };
-    });
+  return new DecisiveDriverDynamo
+    .Operation()
+    .setDocClient(this._docClient)
+    .setMethodName('createTable')
+    .setParams(params)
+    .setItemProperty("TableDescription");
 };
 
 DecisiveDriverDynamo.prototype.listTables = function(){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'listTables', arguments: arguments });
-  return new DecisiveDriverDynamo.Operation()
+  this._logger.trace({ function: 'DecisiveDriverDynamo.listTables', arguments: arguments });
+  return new DecisiveDriverDynamo
+    .Operation()
     .setDocClient(this._docClient)
     .setMethodName('listTables')
     .setParams({ Limit: 100 })
@@ -176,13 +173,17 @@ DecisiveDriverDynamo.prototype.listTables = function(){
     });
 };
 
-DecisiveDriverDynamo.prototype.findTable = function(query, options, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'findTable', arguments: arguments });
-
+DecisiveDriverDynamo.prototype.findTable = function(query, options){
+  this._logger.trace({ function: 'DecisiveDriverDynamo.findTable', arguments: arguments });
+  return new DecisiveDriverDynamo
+    .Operation()
+    .setDocClient(this._docClient)
+    .setMethodName('findTable')
+    .setParams({ TableName: query.tableName });
 };
 
-DecisiveDriverDynamo.prototype.updateTable = function(query, update, options, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'updateTable', arguments: arguments });
+DecisiveDriverDynamo.prototype.updateTable = function(query, update, options){
+  this._logger.trace({ function: 'DecisiveDriverDynamo.updateTable', arguments: arguments });
 
   var params = {
 
@@ -240,44 +241,55 @@ DecisiveDriverDynamo.prototype.updateTable = function(query, update, options, cb
     }
   };
 
-  return this.exec("updateTable", params, cb);
+  return new DecisiveDriverDynamo
+    .Operation()
+    .setDocClient(this._docClient)
+    .setMethodName('updateTable')
+    .setParams(params);
 };
 
-DecisiveDriverDynamo.prototype.destroyTable = function(query, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'destroyTable', arguments: arguments });
-  var params = { TableName: query.tableName };
-  return this.exec("createTable", params, cb);
+// The DeleteTable operation deletes a table and all of its items.
+// this._dynamoDb.deleteTable(params = {}, callback) ⇒ AWS.Request
+
+DecisiveDriverDynamo.prototype.destroyTable = function(query){
+  this._logger.trace({ function: 'DecisiveDriverDynamo.destroyTable', arguments: arguments });
+  return new DecisiveDriverDynamo
+    .Operation()
+    .setDocClient(this._docClient)
+    .setMethodName('destroyTable')
+    .setParams({ TableName: query.tableName });
+    // .setItemProperty('TableName');
 };
 
 
 
 DecisiveDriverDynamo.prototype.createItem = function(attrs, options, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'createItem', arguments: arguments });
+  this._logger.trace({ function: 'DecisiveDriverDynamo.createItem', arguments: arguments });
 
 };
 
 DecisiveDriverDynamo.prototype.listItems = function(query, options, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'listItems', arguments: arguments });
+  this._logger.trace({ function: 'DecisiveDriverDynamo.listItems', arguments: arguments });
 
 };
 
 DecisiveDriverDynamo.prototype.findItem = function(query, options, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'findItem', arguments: arguments });
+  this._logger.trace({ function: 'DecisiveDriverDynamo.findItem', arguments: arguments });
 
 };
 
 DecisiveDriverDynamo.prototype.findItems = function(query, options, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'findItems', arguments: arguments });
+  this._logger.trace({ function: 'DecisiveDriverDynamo.findItems', arguments: arguments });
 
 };
 
 DecisiveDriverDynamo.prototype.updateItem = function(query, update, options, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'updateItem', arguments: arguments });
+  this._logger.trace({ function: 'DecisiveDriverDynamo.updateItem', arguments: arguments });
 
 };
 
 DecisiveDriverDynamo.prototype.destroyItem = function(query, options, cb){
-  this._logger.trace({ class: 'DecisiveDriverDynamo', function: 'destroyItem', arguments: arguments });
+  this._logger.trace({ function: 'DecisiveDriverDynamo.destroyItem', arguments: arguments });
 
 };
 

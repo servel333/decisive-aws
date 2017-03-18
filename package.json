@@ -1,0 +1,29 @@
+{
+  "name": "decisive-aws",
+  "version": "0.1.0",
+  "description": "Amazon Web Services frameworks",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/servel333/decisive-aws.git"
+  },
+  "keywords": [
+    "AWS",
+    "Amazon",
+    "Web",
+    "Services"
+  ],
+  "author": "Nathan Perry",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/servel333/decisive-aws/issues"
+  },
+  "homepage": "https://github.com/servel333/decisive-aws#readme",
+  "dependencies": {
+    "grunt": "1.0.1",
+    "mocha": "2.4.5"
+  }
+}

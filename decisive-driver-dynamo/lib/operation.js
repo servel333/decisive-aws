@@ -20,9 +20,14 @@ Operation.prototype.setLogger = function(logger){
 
 Operation.prototype.setDocClient = function(v){ this._docClient = v; return this; };
 Operation.prototype.setMethodName = function(v){ this._methodName = v; return this; };
-Operation.prototype.setParams = function(v){ this._params = v; return this; };
 Operation.prototype.setItemsProperty = function(v){ this._itemsProperty = v; return this; };
 Operation.prototype.setItemProperty = function(v){ this._itemProperty = v; return this; };
+
+Operation.prototype.setParams = function(v){
+  this._logger.trace({ function: 'Operation.setParams', params: v });
+  this._params = v;
+  return this;
+};
 
 /** @callback Operation~GetNextParams
  *
@@ -40,7 +45,7 @@ Operation.prototype.setGetNextParams = function(v){ this._getNextParams = v; ret
 Operation.prototype.loadAll = function(){ this._loadAll = true; return this; };
 
 Operation.prototype.getError = function(){
-  this._logger.trace({ class: 'Operation', function: 'getError', arguments: arguments });
+  this._logger.trace({ function: 'Operation.getError', arguments: arguments });
   var errors = [];
   if (! this._docClient) { errors.push({ message: "Operation missing _docClient" }); }
   if (! this._methodName) { errors.push({ message: "Operation missing _methodName" }); }
@@ -65,7 +70,7 @@ Operation.prototype.isSingle = function(){ return   this._itemProperty && ! this
 Operation.prototype.isMulti  = function(){ return ! this._itemProperty &&   this._itemsProperty; };
 
 Operation.prototype.hasNextPage = function(resp, params) {
-  this._logger.trace({ class: 'Operation', function: 'hasNextPage', arguments: arguments });
+  this._logger.trace({ function: 'Operation.hasNextPage', arguments: arguments });
   return ! this._itemProperty &&
     resp &&
     this._itemsProperty &&
@@ -76,7 +81,7 @@ Operation.prototype.hasNextPage = function(resp, params) {
 };
 
 Operation.prototype.driver = function(){
-  this._logger.trace({ class: 'Operation', function: 'driver', arguments: arguments });
+  this._logger.trace({ function: 'Operation.driver', arguments: arguments });
   if (DecisiveSupport.isFunction(this._docClient[this._methodName])) {
     return this._docClient;
   } else if (DecisiveSupport.isFunction(this._docClient.service[this._methodName])) {
@@ -85,42 +90,48 @@ Operation.prototype.driver = function(){
 };
 
 Operation.prototype._send = function(params, callback){
-  this._logger.trace({ class: 'Operation', function: '_send', arguments: arguments });
+  this._logger.trace({ function: 'Operation._send', arguments: arguments });
 
   var startTime = Date.now();
   var self = this;
 
-  return this.driver()[this._methodName].call(this.driver(), params, function(err, resp) {
-    self._logger.trace({ class: 'Operation', function: '_send driver.'+this._methodName+'>resp', arguments: arguments });
+  try{
+    return this.driver()[this._methodName].call(this.driver(), params, function(err, resp) {
+      self._logger.trace({ function: 'Operation._send driver.'+self._methodName+'>callback', arguments: arguments });
 
-    var duration = Date.now() - startTime;
+      var duration = Date.now() - startTime;
 
-    if (err) {
-      self._logger.info({ class: 'Operation', method: this._methodName, duration: duration, err : err });
-      return callback(err);
-    }
+      if (err) {
+        self._logger.info({ function: 'Operation._send driver.'+self._methodName, duration: duration, err : err });
+        return callback(err);
+      }
 
-    self._logger.info({ class: 'Operation', method: this._methodName, duration: duration, resp: resp });
-    return callback(null, resp);
-  });
+      self._logger.info({ function: 'Operation._send driver.'+self._methodName, duration: duration, resp: resp });
+
+      return callback(null, resp);
+    });
+  }
+  catch(err){
+    callback(err);
+  }
 };
 
 Operation.prototype.exec = function(callback){
-  this._logger.trace({ class: 'Operation', function: 'exec', arguments: arguments });
+  this._logger.trace({ function: 'Operation.exec', arguments: arguments });
 
   var err = this.getError();
   if (err) {
-    this._logger.info({ class: 'Operation', method: this._methodName, duration: 0, err : err });
+    this._logger.info({ function: 'Operation.exec '+this._methodName, duration: 0, err : err });
     return callback(err);
   }
 
   this.startTime = Date.now();
-  this._logger.info({ class: 'Operation', method: this._methodName, params : this._params});
+  this._logger.info({ function: 'Operation.exec '+this._methodName, params : this._params});
 
   var self = this;
 
   var paginate = function(resp, params){
-    self._logger.trace({ class: 'Operation', function: 'exec paginate', arguments: arguments });
+    self._logger.trace({ function: 'Operation.exec paginate', arguments: arguments });
 
     if (! self._loadAll || ! self.hasNextPage(resp, params)) {
       if (self._itemsProperty) { return callback(null, resp[self._itemsProperty]); }

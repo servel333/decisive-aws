@@ -9,6 +9,7 @@ SilentLogger.prototype.error   = function(){ return this; };
 SilentLogger.prototype.err     = function(){ return this; };
 SilentLogger.prototype.info    = function(){ return this; };
 SilentLogger.prototype.log     = function(){ return this; };
+SilentLogger.prototype.silly   = function(){ return this; };
 SilentLogger.prototype.trace   = function(){ return this; };
 SilentLogger.prototype.warning = function(){ return this; };
 SilentLogger.prototype.warn    = function(){ return this; };

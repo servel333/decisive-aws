@@ -11,6 +11,7 @@ var ConsoleLogger = module.exports = function ConsoleLogger(){};
 var _log = function(args, name){
   args = Array.prototype.slice.call(args);
   args = args.map(function(val, i){
+    if (typeof val === "string") { return val; }
     return JSON.stringify(val);
   });
 
@@ -37,10 +38,12 @@ ConsoleLogger.prototype.error   = function(){ return _log(arguments, 'error'); }
 ConsoleLogger.prototype.err     = function(){ return _log(arguments, 'error'); };
 ConsoleLogger.prototype.info    = function(){ return _log(arguments, 'info' ); };
 ConsoleLogger.prototype.log     = function(){ return _log(arguments         ); };
+ConsoleLogger.prototype.silly   = function(){ return _log(arguments         ); };
 ConsoleLogger.prototype.trace   = function(){ return _log(arguments         ); };
 ConsoleLogger.prototype.warning = function(){ return _log(arguments, 'warn' ); };
 ConsoleLogger.prototype.warn    = function(){ return _log(arguments, 'warn' ); };
 ConsoleLogger.prototype.write   = function(){ return _log(arguments         ); };
 
-// Logger.prototype.trace = function(){ return this; }; // disables #debug()
 // Logger.prototype.debug = function(){ return this; }; // disables #debug()
+// Logger.prototype.silly = function(){ return this; }; // disables #silly()
+// Logger.prototype.trace = function(){ return this; }; // disables #trace()
